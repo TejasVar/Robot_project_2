@@ -29,21 +29,19 @@ void process_image_callback(const sensor_msgs::Image img)
 {
 
     int white_pixel = 255;
-    //bool white_ball_found=false;
-    // TODO: Loop through each pixel in the image and check if there's a bright white one
-    // Then, identify if this pixel falls in the left, mid, or right side of the image
-    // Depending on the white ball position, call the drive_bot function and pass velocities to it
-    // Request a stop when there's no white ball seen by the camera
-     //bool ball_detected = false;
-
-    // Loop through each pixel in the image and check if its equal to the first one
-
+    
 // Image size is 800 (height) by 800 (width). The step size is 2400 -> each row contains rgb value per pixel
 // left boundary=266 (800/3); right boundary=533 etc.
 int count=0; //count of white pixels
 float avg_index=0.0;
-int x_index;
+int x_index {};
 int position=0; //-1:left, 0:center, 1:right
+
+// Following for loop calculates a center of geometry of white pixel area
+// First,white pixel is identified, and it's x axis position/index is captured.
+// Then, a running average of all indices is maintained to calculate new avg_index everytime
+// ,i.e. avg_index=(x_index+avg_index*count)/(count+1);
+// The avg_index indicates x index of center of geometry, for instance- center of a ball! 
 for(int j=0; j<img.height*img.width; j++)
 {
     int k=3*j; //there are rgb (3) values per "j"
@@ -55,8 +53,12 @@ for(int j=0; j<img.height*img.width; j++)
         count++;
     }
 }
+
+// As described earlier, the count indicates if at least one single white pixel was identified
+// The average index indicated x index/position of center of geometry of white pixel area.
+// Since the pixel width is 800, the left boundary spans 0 to 266 and right boundary from 533 to 800.
 if(count>0)
-    {white_ball_found=true;
+    {//white_ball_found=true;
     cout<<"whiteball found on:"<<endl;
     if(avg_index<=266)
     {position=-1;
@@ -74,10 +76,8 @@ if(count>0)
     }
 else
     drive_robot(0.0,0.0);
-
     //cout<<"image_height:"<<img.height<<", img.width:"<<img.width<<", img.step:"<<img.step<<endl;
     //cout<<"image data [10]:"<<img.data[10]<<endl;
-
 }
 
 int main(int argc, char** argv)
